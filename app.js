@@ -26,3 +26,28 @@ function update() {
 // Register service worker
 if ('serviceWorker' in navigator)
   navigator.serviceWorker.register('sw.js')
+
+let deferredPrompt
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault()
+  deferredPrompt = e
+  showInstallButton()
+})
+
+function showInstallButton() {
+  const btn = document.createElement('button')
+  btn.textContent = 'Install App'
+  btn.style = 'position:fixed;bottom:1em;right:1em;font-size:1.2em'
+  document.body.appendChild(btn)
+
+  btn.onclick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt()
+      const { outcome } = await deferredPrompt.userChoice
+      if (outcome === 'accepted') console.log('App installed')
+      else console.log('User dismissed install')
+      btn.remove()
+    }
+  }
+}
